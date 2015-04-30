@@ -13,7 +13,7 @@ public class ProxyMultiThread {
             // and the local port that we listen for connections on
             String host = "192.168.56.10";
             int remoteport = 80;
-            int localport = 1120;
+            int localport = 1121;
             // Print a start-up message
             System.out.println("Starting proxy for " + host + ":" + remoteport
                     + " on port " + localport);
@@ -93,7 +93,7 @@ class ThreadProxy extends Thread {
                     //TODO CREATE YOUR LOGIC HERE
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } finally {
                 try {
                     if (server != null)
