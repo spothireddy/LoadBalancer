@@ -8,7 +8,7 @@ public class SimpleProxyServer {
     try {
       String host = "192.168.56.10";
       int remoteport = 80;
-      int localport = 1113;
+      int localport = 1117;
       // Print a start-up message
       System.out.println("Starting proxy for " + host + ":" + remoteport
           + " on port " + localport);
@@ -36,6 +36,20 @@ public class SimpleProxyServer {
       try {
         // Wait for a connection on the local port
         client = ss.accept();
+        
+        final InetAddress localAddress = client.getLocalAddress();
+        final int localPort = client.getLocalPort();
+        final InetAddress remoteAddress = client.getInetAddress();
+        final int remotePort = client.getPort();
+        
+        System.out.println("LOCAL STUFF: " + localAddress.getCanonicalHostName()+":"+localPort + " (" + localAddress.getHostAddress() + ")");
+        
+        System.out.println(
+                "Accepted connection from "+
+                remoteAddress.getCanonicalHostName() + ":" + 
+                remotePort + " (" + remoteAddress.getHostAddress() + ")");
+        
+        
         System.out.println("CLIENT CONNECTED");
         final InputStream streamFromClient = client.getInputStream();
         final OutputStream streamToClient = client.getOutputStream();
@@ -94,6 +108,7 @@ public class SimpleProxyServer {
           }
         } catch (IOException e) {
         }
+        
 
         // The server closed its connection to us, so we close our
         // connection to our client.
