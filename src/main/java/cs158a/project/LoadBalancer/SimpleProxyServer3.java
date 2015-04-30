@@ -1,9 +1,10 @@
 package cs158a.project.LoadBalancer;
 
+
 import java.io.*;
 import java.net.*;
 
-public class SimpleProxyServer {
+public class SimpleProxyServer3 {
 	static boolean servingFrom1 = true;
 
 	public static void main(String[] args) throws IOException {
@@ -11,7 +12,7 @@ public class SimpleProxyServer {
 			String host = "192.168.56.10";
 			String host2 = "192.168.56.11";
 			int remoteport = 80;
-			int localport = 1126;
+			int localport = 1122;
 			// Print a start-up message
 			System.out.println("Starting proxy for " + host + ":" + remoteport
 					+ " and " + host2 + ":" + remoteport + " on port "
@@ -75,7 +76,7 @@ public class SimpleProxyServer {
 							+ remoteport + ":\n" + e + "\n");
 					out.flush();
 					client.close();
-					//continue;
+					continue;
 				}
 
 				// Get server streams.
@@ -101,7 +102,7 @@ public class SimpleProxyServer {
 									streamToServer.write(request, 0, bytesRead);
 									streamToServer.flush();
 									servingFrom1 = false;
-								} else if(!servingFrom1) {
+								} else {
 									System.out
 											.println("Forwarding client request to server at "
 													+ host2);
@@ -110,15 +111,9 @@ public class SimpleProxyServer {
 									streamToServer2.flush();
 									servingFrom1 = true;
 								}
-								else {
-									System.out.println("BLAH BLAH BLAH");
-								}
 
 							}
 						} catch (IOException e) {
-							System.out.println(e);
-							System.out.println(e.toString());
-							System.out.println("THREAD EXCEPTION!!!!!!");
 						}
 
 						// the client closed the connection to us, so close our
@@ -172,11 +167,9 @@ public class SimpleProxyServer {
 						server.close();
 						System.out.println("close connection to server~~");
 					}
-					else if (server2 != null){
-						server2.close();
-						System.out.println("close connection to server~2~");
-					}
 						
+					if (server2 != null)
+						server2.close();
 					if (client != null)
 						client.close();
 				} catch (IOException e) {
@@ -187,8 +180,7 @@ public class SimpleProxyServer {
 	}
 
 }
-
-/*
+/**
 class ThreadProxy extends Thread {
 	private Socket sClient;
 	private final String SERVER_URL;
@@ -206,4 +198,4 @@ class ThreadProxy extends Thread {
 
 	}
 }
-*/
+**/

@@ -12,14 +12,17 @@ public class ProxyMultiThread {
            
             // and the local port that we listen for connections on
             String host = "192.168.56.10";
+            String host2 = "192.168.56.11";
             int remoteport = 80;
-            int localport = 1121;
+            int localport = 1122;
             // Print a start-up message
             System.out.println("Starting proxy for " + host + ":" + remoteport
                     + " on port " + localport);
             ServerSocket server = new ServerSocket(localport);
+         
             while (true) {
                 new ThreadProxy(server.accept(), host, remoteport);
+                new ThreadProxy(server.accept(), host2, remoteport);
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -66,7 +69,7 @@ class ThreadProxy extends Thread {
             final InputStream inFromServer = server.getInputStream();
             final OutputStream outToServer = server.getOutputStream();
             // a new thread for uploading to the server
-            new Thread() {
+           new Thread() {
                 public void run() {
                     int bytes_read;
                     try {
@@ -84,8 +87,8 @@ class ThreadProxy extends Thread {
                     }
                 }
             }.start();
-            // current thread manages streams from server to client (DOWNLOAD)
-            int bytes_read;
+             //current thread manages streams from server to client (DOWNLOAD)
+           int bytes_read;
             try {
                 while ((bytes_read = inFromServer.read(reply)) != -1) {
                     outToClient.write(reply, 0, bytes_read);
