@@ -1,9 +1,10 @@
-package cs158a.project.LoadBalancer;
+package test;
+
 
 import java.io.*;
 import java.net.*;
 
-public class SimpleProxyServer {
+public class LoadBalancer {
 	static boolean servingFrom1 = true;
 	static boolean allServersDown = false;
 	static boolean server1Down = false;
@@ -18,6 +19,7 @@ public class SimpleProxyServer {
 		try {
 			String host = "192.168.56.10";
 			String host2 = "192.168.56.11";
+			String loadBalancer = "192.168.56.1";
 			int remoteport = 80;
 			int localport = 1127;
 			// Print a start-up message
@@ -169,7 +171,6 @@ public class SimpleProxyServer {
 						allServersDown = true;
 					}
 					else if(server1Down){
-						System.out.println("Server 1 down");
 						servingFrom1 = false;
 					}
 				}
@@ -186,7 +187,6 @@ public class SimpleProxyServer {
 					
 					if(server1Down && server2Down){
 						allServersDown = true;
-						System.out.println("Both servers down.");
 					}
 					
 					
@@ -208,9 +208,8 @@ public class SimpleProxyServer {
 						try {
 							//boolean x = server.isConnected();
 							System.out.println("Read Client's request");
-							if(allServersDown){
-								System.out.println("ALL SERVERS ARE DOWN.");
-							}else{
+
+								
 								while ((bytesRead = streamFromClient.read(request)) != -1) {
 									if (servingFrom1 ) {
 										System.out
@@ -219,7 +218,6 @@ public class SimpleProxyServer {
 										streamToServer.write(request, 0, bytesRead);
 										streamToServer.flush();
 										servingFrom1 = false;
-										System.out.println("Done forwarding. ");
 									} else if(!servingFrom1 ) {
 										System.out
 												.println("Forwarding client request to server at "
@@ -228,20 +226,20 @@ public class SimpleProxyServer {
 												.write(request, 0, bytesRead);
 										streamToServer.flush();
 										servingFrom1 = true;
-										System.out.println("Done forwarding. ");
 									}
 									
+									// the client closed the connection to us, so close our
+									// connection to the server.
+									System.out.println("Closed connection to server");
+									streamToServer.close();
+									//streamToServer2.close(); // checkkkkk this
+									System.out.println("end connection");
 
 								}
-								
-								System.out.println("Sindhu - Done with while loop.");
-							}
-							System.out.println("Closing stream to server.");
-							streamToServer.close();
-							System.out.println("Done closing stream to server.");
+							
 							
 						} catch (IOException e) {
-							System.out.println("THREAD EXCEPTION!!!!!! -Sindhu");
+							System.out.println("THREAD EXCEPTION!!!!!!");
 							e.printStackTrace();
 						}
 						finally{
@@ -261,40 +259,41 @@ public class SimpleProxyServer {
 				int bytesRead;
 				try {
 					//System.out.println("Reading server's response");
+				/**
+				 * 	if(allServersDown){
+						reply = "ALL SERVERS ARE DOWN. TRY AGAIN LATER.".getBytes();
+						System.out.println("9999: ALL SERVERS DOWN");
+					}
+				else 
+				 */
+					
 					if (servingFrom1) {
-						System.out.println("Passing back server's response.");
+						
 						while ((bytesRead = streamFromServer.read(reply)) != -1) {
 							streamToClient.write(reply, 0, bytesRead);
 							streamToClient.flush();
 						}
 						servingFrom1 = false;
 					} else if(!servingFrom1){
-						System.out.println("Passing back server's response.");
 						while ((bytesRead = streamFromServer.read(reply)) != -1) {
 							streamToClient.write(reply, 0, bytesRead);
 							streamToClient.flush();
 						}
 						servingFrom1 = true;
 					}
-					///stream to server here close here??
-					
+
 				} catch (IOException e) {
-					System.out.println("Sindhu: SERVINGGGGG");
-					e.printStackTrace();
+					// e.printStackTrace();
 				}
 
 				// The server closed its connection to us, so we close our
 				// connection to our client.
-				System.out.println("Closing client stream");
 				streamToClient.close();
 				System.out.println("Closed connection to client.");
 			} catch (IOException e) {
 				System.err.println(e);
 			} finally {
 				try {
-					System.out.println("Closed connection to server");
-					
-					//streamToServer2.close(); // checkkkkk this
 					if (server != null){
 						server.close();
 						System.out.println("close connection to server~~");
@@ -307,19 +306,16 @@ public class SimpleProxyServer {
 					if (client != null)
 						client.close();
 					
-					allServersDown = false;
-					server1Down = false;
-					server2Down = false;
 					
-
-					// the client closed the connection to us, so close our
-					// connection to the server.
-					
-					System.out.println("end connection");
 					
 				} catch (IOException e) {
 					
 					System.out.println(" CLOSE 1" + e);
+				}
+				finally{
+					allServersDown = false;
+					server1Down = false;
+					server2Down = false;
 				}
 			}
 		}
