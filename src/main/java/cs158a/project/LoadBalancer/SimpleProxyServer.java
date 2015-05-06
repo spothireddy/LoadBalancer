@@ -18,6 +18,7 @@ public class SimpleProxyServer {
 		try {
 			String host = "192.168.56.10";
 			String host2 = "192.168.56.11";
+
 			int remoteport = 80;
 			int localport = 1127;
 			// Print a start-up message
@@ -27,95 +28,83 @@ public class SimpleProxyServer {
 			// And start running the server
 			runServer(host, host2, remoteport, localport); // never returns
 		} catch (Exception e) {
-			System.err.println("1. ERROR OCCURED " );
+			System.err.println("1. ERROR OCCURED ");
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Make connection to server 1
 	 */
-	public static void connectToServer1(String host, int remoteport, OutputStream streamToClient){
+	public static void connectToServer1(String host, int remoteport,
+			OutputStream streamToClient) {
 		// Make a connection to the real server.
 		// If we cannot connect to the server, send an error to the
 		// client, disconnect, and continue waiting for connections.
 		try {
 			System.out.println("Make connection to real server for 1");
-			
+
 			server = new Socket(host, remoteport);
-			
+
 			streamFromServer = server.getInputStream();
 			streamToServer = server.getOutputStream();
-			
 
 		} catch (IOException e) {
 			System.out.println("Server 1 is down.");
 			server = null;
-			//servingFrom1 = false;
+			// servingFrom1 = false;
 			server1Down = true;
 			/**
-			PrintWriter out = new PrintWriter(streamToClient);
-			System.out.print("Proxy server cannot connect to " + host + ":"
-					+ remoteport + ":\n" + e + "\n");
-			e.printStackTrace();
-			out.print("HELLOOOOOOO ");
-			out.flush();
-			//client.close();
-			//continue;
+			 * PrintWriter out = new PrintWriter(streamToClient);
+			 * System.out.print("Proxy server cannot connect to " + host + ":" +
+			 * remoteport + ":\n" + e + "\n"); e.printStackTrace();
+			 * out.print("HELLOOOOOOO "); out.flush(); //client.close();
+			 * //continue;
 			 * 
-			*/
-		}finally{
-			
+			 */
+		} finally {
+
 		}
 	}
-	
-	
+
 	/**
 	 * Connect to server 2
 	 */
-	public static void connectToServer2(String host2, int remoteport, OutputStream streamToClient){
+	public static void connectToServer2(String host2, int remoteport,
+			OutputStream streamToClient) {
 		try {
 			System.out.println("Make connection to real server for 2");
-			
+
 			server2 = new Socket(host2, remoteport);
 			System.out.println("Established connection to server 2");
-			//lll
+			// lll
 			streamFromServer = server2.getInputStream();
 			streamToServer = server2.getOutputStream();
 		} catch (Exception e) {
 			server2 = null;
 			server2Down = true;
-			
+
 			/**
-			if(server1Down){
-				allServersDown = true;
-			}
-			else{
-				servingFrom1 = true;
-			}
-			**/
-			
-			
+			 * if(server1Down){ allServersDown = true; } else{ servingFrom1 =
+			 * true; }
+			 **/
+
 			/**
-			PrintWriter out = new PrintWriter(streamToClient);
-			System.out.print("Proxy server cannot connect to " + host2 + ":"
-					+ remoteport + ":\n" + e + "\n");
-			System.out.println("Server 2 is down.");
-			out.print("HELLOOOOO 2");
-			e.printStackTrace();
-			//out.flush();
-			//client.close();
-			//continue;
+			 * PrintWriter out = new PrintWriter(streamToClient);
+			 * System.out.print("Proxy server cannot connect to " + host2 + ":"
+			 * + remoteport + ":\n" + e + "\n");
+			 * System.out.println("Server 2 is down.");
+			 * out.print("HELLOOOOO 2"); e.printStackTrace(); //out.flush();
+			 * //client.close(); //continue;
 			 * 
-			*/
-		} finally{
+			 */
+		} finally {
 			System.out.println("Server 2: End of try catch");
 		}
-		
-		//System.out.println("Server 2: End of try catch");
+
+		// System.out.println("Server 2: End of try catch");
 	}
-	
-	
+
 	/**
 	 * runs a single-threaded proxy server on the specified local port. It never
 	 * returns.
@@ -130,7 +119,7 @@ public class SimpleProxyServer {
 		byte[] reply = new byte[4096];
 
 		while (true) {
-			
+
 			try {
 				// Wait for a connection on the local port
 				client = ss.accept();
@@ -154,51 +143,36 @@ public class SimpleProxyServer {
 				final InputStream streamFromClient = client.getInputStream();
 				final OutputStream streamToClient = client.getOutputStream();
 
-				
-				
-
-				
 				// Get server streams.
-				
+
 				System.out.println("Get server streams");
-				
-				if(servingFrom1){				
+
+				if (servingFrom1) {
 					connectToServer1(host, remoteport, streamToClient);
-					
-					if(server2Down){
+
+					if (server2Down) {
 						allServersDown = true;
-					}
-					else if(server1Down){
+					} else if (server1Down) {
 						System.out.println("Server 1 down");
 						servingFrom1 = false;
 					}
 				}
-				
-				if(!servingFrom1){
-					
-					connectToServer2(host2,remoteport,streamToClient);
-					
-					
-					if (server2Down && !server1Down){
+
+				if (!servingFrom1) {
+
+					connectToServer2(host2, remoteport, streamToClient);
+
+					if (server2Down && !server1Down) {
 						servingFrom1 = true;
 						connectToServer1(host, remoteport, streamToClient);
 					}
-					
-					if(server1Down && server2Down){
+
+					if (server1Down && server2Down) {
 						allServersDown = true;
 						System.out.println("Both servers down.");
 					}
-					
-					
+
 				}
-				
-			
-
-				
-				
-				
-
-				
 
 				// a thread to read the client's requests and pass them
 				// to the server. A separate thread for asynchronous.
@@ -206,49 +180,44 @@ public class SimpleProxyServer {
 					public void run() {
 						int bytesRead;
 						try {
-							//boolean x = server.isConnected();
+							// boolean x = server.isConnected();
 							System.out.println("Read Client's request");
-							if(allServersDown){
-								System.out.println("ALL SERVERS ARE DOWN.");
-							}else{
-								while ((bytesRead = streamFromClient.read(request)) != -1) {
-									if (servingFrom1 ) {
-										System.out
-												.println("Forwarding client request to server at "
-														+ host);
-										streamToServer.write(request, 0, bytesRead);
-										streamToServer.flush();
-										servingFrom1 = false;
-										System.out.println("Done forwarding. ");
-									} else if(!servingFrom1 ) {
-										System.out
-												.println("Forwarding client request to server at "
-														+ host2);
-										streamToServer
-												.write(request, 0, bytesRead);
-										streamToServer.flush();
-										servingFrom1 = true;
-										System.out.println("Done forwarding. ");
-									}
-									
 
+							while ((bytesRead = streamFromClient.read(request)) != -1) {
+								if (servingFrom1) {
+									System.out
+											.println("Forwarding client request to server at "
+													+ host);
+									streamToServer.write(request, 0, bytesRead);
+									streamToServer.flush();
+									servingFrom1 = false;
+									System.out.println("Done forwarding. ");
+								} else if (!servingFrom1) {
+									System.out
+											.println("Forwarding client request to server at "
+													+ host2);
+									streamToServer.write(request, 0, bytesRead);
+									streamToServer.flush();
+									servingFrom1 = true;
+									System.out.println("Done forwarding. ");
 								}
-								
-								System.out.println("Sindhu - Done with while loop.");
+
 							}
+
+
+
 							System.out.println("Closing stream to server.");
 							streamToServer.close();
-							System.out.println("Done closing stream to server.");
-							
-						} catch (IOException e) {
-							System.out.println("THREAD EXCEPTION!!!!!! -Sindhu");
-							e.printStackTrace();
-						}
-						finally{
-							
-						}
+							System.out
+									.println("Done closing stream to server.");
 
-						
+						} catch (IOException e) {
+							System.out
+									.println("THREAD EXCEPTION!");
+							e.printStackTrace();
+						} finally {
+
+						}
 
 					}
 				};
@@ -260,27 +229,29 @@ public class SimpleProxyServer {
 				// and pass them back to the client.
 				int bytesRead;
 				try {
-					//System.out.println("Reading server's response");
-					if (servingFrom1) {
-						System.out.println("Passing back server's response.");
+					// System.out.println("Reading server's response");
+					if (allServersDown) {
+						System.out.println("ALL SERVERS ARE DOWN");
+						
+					} else if (servingFrom1) {
+						System.out.println("Passing back server's response to 1.");
 						while ((bytesRead = streamFromServer.read(reply)) != -1) {
 							streamToClient.write(reply, 0, bytesRead);
 							streamToClient.flush();
 						}
 						servingFrom1 = false;
-					} else if(!servingFrom1){
-						System.out.println("Passing back server's response.");
+					} else if (!servingFrom1) {
+						System.out.println("Passing back server's response to 2.");
 						while ((bytesRead = streamFromServer.read(reply)) != -1) {
 							streamToClient.write(reply, 0, bytesRead);
 							streamToClient.flush();
 						}
 						servingFrom1 = true;
 					}
-					///stream to server here close here??
-					
+					// /stream to server here close here??
+
 				} catch (IOException e) {
-					System.out.println("Sindhu: SERVINGGGGG");
-					e.printStackTrace();
+					// e.printStackTrace();
 				}
 
 				// The server closed its connection to us, so we close our
@@ -293,32 +264,30 @@ public class SimpleProxyServer {
 			} finally {
 				try {
 					System.out.println("Closed connection to server");
-					
-					//streamToServer2.close(); // checkkkkk this
-					if (server != null){
+
+					// streamToServer2.close(); // checkkkkk this
+					if (server != null) {
 						server.close();
 						System.out.println("close connection to server~~");
-					}
-					else if (server2 != null){
+					} else if (server2 != null) {
 						server2.close();
 						System.out.println("close connection to server~2~");
 					}
-						
+
 					if (client != null)
 						client.close();
-					
+
 					allServersDown = false;
 					server1Down = false;
 					server2Down = false;
-					
 
 					// the client closed the connection to us, so close our
 					// connection to the server.
-					
+
 					System.out.println("end connection");
-					
+
 				} catch (IOException e) {
-					
+
 					System.out.println(" CLOSE 1" + e);
 				}
 			}
@@ -329,21 +298,14 @@ public class SimpleProxyServer {
 }
 
 /*
-class ThreadProxy extends Thread {
-	private Socket sClient;
-	private final String SERVER_URL;
-	private final int SERVER_PORT;
-
-	ThreadProxy(Socket sClient, String ServerUrl, int ServerPort) {
-		this.SERVER_URL = ServerUrl;
-		this.SERVER_PORT = ServerPort;
-		this.sClient = sClient;
-		this.start();
-	}
-
-	@Override
-	public void run() {
-
-	}
-}
-*/
+ * class ThreadProxy extends Thread { private Socket sClient; private final
+ * String SERVER_URL; private final int SERVER_PORT;
+ * 
+ * ThreadProxy(Socket sClient, String ServerUrl, int ServerPort) {
+ * this.SERVER_URL = ServerUrl; this.SERVER_PORT = ServerPort; this.sClient =
+ * sClient; this.start(); }
+ * 
+ * @Override public void run() {
+ * 
+ * } }
+ */
